@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://web-harvest.sourceforge.net/schema/1.0/config" charset="UTF-8">
+    <!-- converts OCR XML with variants to viewable XML -->
+    
+    <var-def name="ocr_results_s3_bucket">
+        <template>${ocr_results_s3_bucket}</template>
+    </var-def>
+    
+    <var-def name="ocr_results_s3_path">
+        <template>${ocr_results_s3_path}</template>
+    </var-def>
+    
+    <var-def name="documentContent">
+        <http url="${document_xml_with_char_params_link}" charset="UTF-8"/>
+    </var-def>
+    
+    <var-def name="document_uuid">
+        <template>${document_uuid}</template>
+    </var-def>
+    
+    <var-def name="viewer">
+        <![CDATA[ 
+            <link href="https://s3.amazonaws.com/workfusion-resources/ocr/ocr-xml-viewer-0.3-scale-to-width.css" rel="stylesheet" type="text/css"/>
+            <script src="https://s3.amazonaws.com/workfusion-resources/jquery/core/1.8.3/jquery.min.js" type="text/javascript"></script>
+            <script src="https://s3.amazonaws.com/workfusion-resources/ocr/ocr-xml-viewer-0.3-scale-to-width.js"></script>
+            
+            <script>
+                $(document).ready(function() {
+                    generate($('body'), 1.8);
+                });
+            </script>
+         ]]>
+    </var-def>
+    
+    
+    <var-def name="resultXml">
+    <xslt>
+        <xml>
+            <var name="documentContent"/>
+        </xml>
+        <stylesheet>
+            <template>
+            <![CDATA[
+                <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                    <xsl:output method="html"/>
+                    
+                    <xsl:template match="node()|@*">
+                        <xsl:copy>
+                            <xsl:apply-templates select="node()|@*"/>
+                        </xsl:copy>
+                    </xsl:template>
+                    
+                    <xsl:template match="*:document">
+                        <!-- Adding newline after xml declaration (http://bugs.java.com/view_bug.do?bug_id=7150637 ???)-->
+                        <xsl:text>&#xa;</xsl:text>
+                        <xsl:copy>
+                            <xsl:apply-templates select="@*"/>
+                            <xsl:text disable-output-escaping="yes">${sys.escapeXml(viewer)}</xsl:text>
+                            
+                            <xsl:apply-templates select="node()"/>
+                        </xsl:copy>
+                    </xsl:template>
+                    
+                    <xsl:template match="*:block[@blockType='Table' or @blocktype='Table']">
+                        <xsl:element name="table">
+                            <xsl:apply-templates select="node()|@*"/>
+                        </xsl:element>
+                    </xsl:template>
+                    <xsl:template match="*:row">
+                        <xsl:if test="normalize-space(string(.)) != ''">
+                            <xsl:element name="tr">
+                                <xsl:apply-templates select="node()|@*"/>
+                            </xsl:element>
+                        </xsl:if>
+                    </xsl:template>
+                    <xsl:template match="*:cell">
+                        <xsl:element name="td">
+                            <xsl:apply-templates select="node()|@*"/>
+                        </xsl:element>
+                    </xsl:template>
+                    <xsl:template match="@width">
+                       <xsl:attribute name="w">
+                          <xsl:value-of select="."/>
+                       </xsl:attribute>
+                    </xsl:template>
+                    <xsl:template match="@height">
+                       <xsl:attribute name="h">
+                          <xsl:value-of select="."/>
+                       </xsl:attribute>
+                    </xsl:template>
+                    
+                    <!-- Removing charParams and charRecVariants, leaving only the value itself. -->
+                    <xsl:template match="*:charParams">
+                        <xsl:value-of select="text()[last()]"/>
+                    </xsl:template>
+                    
+                    <!-- Removing whitespaces before and after charParams nodex -->
+                    <xsl:template match="text()[preceding-sibling::*:charParams or following-sibling::*:charParams]">
+                    </xsl:template>
+                </xsl:stylesheet>
+                 ]]>
+                 </template>
+        </stylesheet>
+    </xslt>
+    </var-def>
+    
+    <var-def name="pagesCount">
+        <xpath expression="count(//*:page)">
+            <var name="resultXml"/>
+        </xpath>
+    </var-def>
+    
+    <var-def name="tablesCount">
+        <xpath expression="count(//*:block[@blockType = 'Table' or @blocktype='Table']|//table)">
+            <var name="resultXml"/>
+        </xpath>
+    </var-def>
+    
+    <var-def name="cellsCount">
+        <xpath expression="count(//*:cell|//*:td)">
+            <var name="resultXml"/>
+        </xpath>
+    </var-def>
+    
+    <var-def name="documentXmlS3Link">
+        <s3 bucket="${ocr_results_s3_bucket}">
+            <s3-put path="${ocr_results_s3_path}/xml/${document_uuid}.xml" acl="PublicReadWrite" content-type="text/html; charset=utf-8" content-disposition="inline">
+                <var name="resultXml" />
+            </s3-put>
+        </s3>
+    </var-def>
+    
+    <export include-original-data="true">
+        <single-column name="number_of_pages" value="${pagesCount}" />
+        <single-column name="number_of_tables" value="${tablesCount}" />
+        <single-column name="number_of_cells" value="${cellsCount}" />
+        <single-column name="document_xml_link" value="${documentXmlS3Link}" />
+    </export>
+    
+</config>
