@@ -7,13 +7,9 @@
 
 It defines classes_and_methods
 
-@author:     user_name
+@author:     Maksim Mikhalkou
 
-@copyright:  2018 organization_name. All rights reserved.
-
-@license:    license
-
-@contact:    user_email
+@contact:    maksim_mikhalkou@epam.com
 @deffield    updated: Updated
 '''
 
@@ -26,7 +22,7 @@ from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
 __all__ = []
-__version__ = 0.1
+__version__ = 0.2
 __date__ = '2018-04-09'
 __updated__ = '2018-04-09'
 
@@ -42,14 +38,6 @@ class CLIError(Exception):
         return self.msg
     def __unicode__(self):
         return self.msg
-    
-class Filter():
-    def __init__(self, filter_str):
-        self.filter_src = 'self.exec_result =' + re.sub(r'{(\S+?)}', r'x["\1"]', filter_str)
-    
-    def filter(self, x):
-        exec(self.filter_src)
-        return self.exec_result
 
 def main(argv=None): # IGNORE:C0111
     '''Command line options.'''
@@ -83,7 +71,8 @@ USAGE
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
         parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0, help='set verbosity level [default: %(default)s]')
         parser.add_argument('-d', '--destination', dest='result_destination', default='filtered.csv', help='report file destination and name', metavar='PATH' )
-        parser.add_argument('-f', '--filter', dest='filter', default='filtered.csv', help='pandas like syntax logic expression: "({COLUMN_NAME}==value) & ({COLUMN_NAME}!=value) ..."', metavar='filter' )
+        parser.add_argument('-f', '--filter', dest='filter', help='pandas query syntax logic expression: "COLUMN_NAME==value and COLUMN_NAME>value & ..."', metavar='filter' )
+        parser.add_argument('-c', '--columns', dest='columns', help='list of columns to keep', metavar='COLUMNS LIST', nargs="*" )
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         parser.add_argument(dest="path", help="path to a source csv file [default: %(default)s]", metavar="path")
 
@@ -92,7 +81,8 @@ USAGE
 
         path = args.path
         verbose = args.verbose
-        filter = Filter(args.filter)
+        filter_query = args.filter
+        columns = args.columns
         destination = args.result_destination
 
         if verbose > 0:
@@ -104,11 +94,19 @@ USAGE
         if verbose > 0:
             docs_count = input_file.shape[0]
             print('Input data contains {} records'.format(docs_count))
-                        
-        filtered = input_file[filter.filter(input_file)]
-        if verbose > 0:
-            docs_count = filtered.shape[0]
-            print('Filtered data contains {} records'.format(docs_count))
+        
+        if filter_query is not None:               
+            filtered = input_file.query(filter_query)#[filter.filter(input_file)]
+            if verbose > 0:
+                docs_count = filtered.shape[0]
+                print('Filtered data contains {} records'.format(docs_count))
+        else:
+            filtered = input_file
+            
+        if len(columns)>0:
+            filtered = filtered.filter(items=columns)
+            if verbose > 0:
+                print("Removed all columns except: {}".format(columns))
             
         filtered.to_csv(destination, index=False)
         if verbose > 0:
