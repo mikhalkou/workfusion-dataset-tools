@@ -111,6 +111,8 @@ def main(argv=None): # IGNORE:C0111
 				for index, row in input_file.iterrows():
 						text = row[tagged_text_column]
 						text= text.replace('<br>', '<br />')
+						if '<document>' not in text:
+							text = '<document>' + text + '</document>'
 						parser = ET.XMLParser(recover=True)
 						document = ET.fromstring(text, parser=parser)
 						extraction_tags = document.findall('.//*[@class="extraction-tag"]')
