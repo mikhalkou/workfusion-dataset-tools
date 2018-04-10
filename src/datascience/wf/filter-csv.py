@@ -103,10 +103,13 @@ USAGE
         else:
             filtered = input_file
             
-        if len(columns)>0:
+        if columns is not None and len(columns)>0:
             filtered = filtered.filter(items=columns)
             if verbose > 0:
-                print("Removed all columns except: {}".format(columns))
+                print('Removed all columns except: {}'.format(columns))
+                for col in columns:
+                    if col not in input_file.columns:
+                        print('Warning {} does not exist.'.format(col))
             
         filtered.to_csv(destination, index=False)
         if verbose > 0:
