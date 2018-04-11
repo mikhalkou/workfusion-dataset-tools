@@ -22,9 +22,9 @@ from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
 __all__ = []
-__version__ = 0.2
+__version__ = 0.3
 __date__ = '2018-04-09'
-__updated__ = '2018-04-09'
+__updated__ = '2018-04-11'
 
 DEBUG = 0
 PROFILE = 0
@@ -73,6 +73,8 @@ USAGE
         parser.add_argument('-d', '--destination', dest='result_destination', default='filtered.csv', help='report file destination and name', metavar='PATH' )
         parser.add_argument('-f', '--filter', dest='filter', help='pandas query syntax logic expression: "COLUMN_NAME==value and COLUMN_NAME>value & ..."', metavar='filter' )
         parser.add_argument('-c', '--columns', dest='columns', help='list of columns to keep', metavar='COLUMNS LIST', nargs="*" )
+        parser.add_argument('-t', '--taggedtext', dest='tagged_text_column',  default='tagged_text', help='text column name [default: %(default)s]', metavar='COLUMN_NAME' )
+        parser.add_argument('--restore_tagged_text', dest='restore_tagged_text', action='count', default=0, help='restore tagged text column [default: %(default)s]' )
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         parser.add_argument(dest="path", help="path to a source csv file [default: %(default)s]", metavar="path")
 
@@ -84,6 +86,8 @@ USAGE
         filter_query = args.filter
         columns = args.columns
         destination = args.result_destination
+        tagged_text_column = args.tagged_text_column
+        restore_tagged_text = args.restore_tagged_text
 
         if verbose > 0:
             print("Verbose mode on")
@@ -94,6 +98,10 @@ USAGE
         if verbose > 0:
             docs_count = input_file.shape[0]
             print('Input data contains {} records'.format(docs_count))
+            
+        if restore_tagged_text > 0 and tagged_text_column not in input_file.columns:
+            print('Error: {} column does not exist'.format(tagged_text_column))
+            return 4
         
         if filter_query is not None:               
             filtered = input_file.query(filter_query)#[filter.filter(input_file)]
@@ -103,6 +111,12 @@ USAGE
         else:
             filtered = input_file
             
+        if restore_tagged_text > 0:
+            filtered[tagged_text_column] = filtered[tagged_text_column].apply(
+                lambda x: x if '<document>' in x else '<document>' + x + '</document>')
+            if verbose > 0:
+                print('Restoring data set is finished.')
+
         if columns is not None and len(columns)>0:
             filtered = filtered.filter(items=columns)
             if verbose > 0:
