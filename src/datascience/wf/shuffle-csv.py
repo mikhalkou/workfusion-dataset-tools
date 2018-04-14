@@ -21,7 +21,7 @@ from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
 __all__ = []
-__version__ = 0.1
+__version__ = 0.2
 __date__ = '2018-04-14'
 __updated__ = '2018-04-14'
 
@@ -103,7 +103,7 @@ USAGE
             result_destination = '{}-shuffled-{}.csv'.format(
                 os.path.splitext(os.path.basename(path))[0], records_to_take)
         
-        input_file.sample(n=records_to_take).to_csv(result_destination)
+        input_file.sample(n=records_to_take).to_csv(result_destination, index=False)
 
         if verbose>0:
             print('Shuffled file wit {} records has been saved to {}'
