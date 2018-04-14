@@ -70,7 +70,7 @@ def main(argv=None): # IGNORE:C0111
 		program_version_message = '%%(prog)s %s (%s)' % (program_version, program_build_date)
 		program_shortdesc = __import__('__main__').__doc__.split("\n")[1]
 		program_license = '''%s
-	Created by user_name on %s.
+	Created by Maksim Mikhalkou on %s.
 ''' % (program_shortdesc, str(__date__))
 
 		try:
