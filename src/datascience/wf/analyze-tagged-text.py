@@ -76,11 +76,15 @@ def main(argv=None): # IGNORE:C0111
 		try:
 				# Setup argument parser
 				parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
-				parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0, help='set verbosity level [default: %(default)s]')
-				parser.add_argument('-d', '--destination', dest='report_destination', default='_report.csv', help='report file destination and name', metavar='PATH' )
-				parser.add_argument('-t', '--taggedtext', dest='tagged_text_column',  default='tagged_text', help='text column name [default: %(default)s]', metavar='COLUMN_NAME' )
+				parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0, 
+								help='set verbosity level [default: %(default)s]')
+				parser.add_argument('-d', '--destination', dest='report_destination', default='_report.csv', 
+								help='report file destination and name', metavar='PATH' )
+				parser.add_argument('-t', '--taggedtext', dest='tagged_text_column',  default='tagged_text', 
+								help='text column name [default: %(default)s]', metavar='COLUMN_NAME' )
 				parser.add_argument('-V', '--version', action='version', version=program_version_message)
-				parser.add_argument(dest='path', help='paths to csv to analyze [default: %(default)s]', metavar='path')
+				parser.add_argument(dest='path', help='paths to csv to analyze [default: %(default)s]', 
+								metavar='path')
 
 				# Process arguments
 				args = parser.parse_args()
@@ -136,9 +140,9 @@ def main(argv=None): # IGNORE:C0111
 								data[k]['errors'].append(v['errors'])
 								data[k]['word_counts'].append(v['word_counts'])
 
-				columns = ['col_name', 'occurs', 'occurs avg. per doc', 'occurs median', 'occurs max ', 'documents count',
-										'documents where occurs', 'OCR error rate', 'words avg.',
-										'words median', 'words min', 'words max' ]
+				columns = ['col_name', 'occurs', 'occurs avg. per doc', 'occurs median', 'occurs max ', 
+							'documents count', 'documents where occurs', 'OCR error rate', 
+							'words avg.', 'words median', 'words min', 'words max' ]
 				stats = pd.DataFrame(columns=columns)
 
 				for k,v in data.items():
@@ -162,8 +166,8 @@ def main(argv=None): # IGNORE:C0111
 						wmax = max(words_flat)
 
 						field_stats = pd.DataFrame([[k, ocount, omean, omed, omax, docs, oindocs,
-																				errrate, wmean, wmed, wmin, wmax]],
-																				columns=columns)
+													errrate, wmean, wmed, wmin, wmax]],
+													columns=columns)
 						stats = pd.concat([stats, field_stats])
 
 

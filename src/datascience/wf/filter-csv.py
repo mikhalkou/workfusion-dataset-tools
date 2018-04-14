@@ -55,13 +55,6 @@ def main(argv=None): # IGNORE:C0111
     program_license = '''%s
 
   Created by user_name on %s.
-  Copyright 2018 organization_name. All rights reserved.
-
-  Licensed under the Apache License 2.0
-  http://www.apache.org/licenses/LICENSE-2.0
-
-  Distributed on an "AS IS" basis without warranties
-  or conditions of any kind, either express or implied.
 
 USAGE
 ''' % (program_shortdesc, str(__date__))

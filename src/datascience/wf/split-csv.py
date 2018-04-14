@@ -68,13 +68,24 @@ Examples:
     try:
         # Setup argument parser
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
-        parser.add_argument('-o', '--format', dest='output_format', default='html', help='recurse into subfolders [default: %(default)s]')
-        parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0, help='set verbosity level [default: %(default)s]')
-        parser.add_argument('-d', '--destination', dest='destination_folder', default='splitted_data', help='output folder destinaton', metavar='PATH' )
-        parser.add_argument('-i', '--id', dest='id_column', help='id column name (is used to generate file name) [default: %(default)s]', metavar='COLUMN_NAME' )
-        parser.add_argument('-t', '--text', dest='text_column',  default='tagged_text', help='text column name (not applicable for json output format) [default: %(default)s]', metavar='COLUMN_NAME' )
-        parser.add_argument('-c', '--columns', dest='column_list', nargs='*', help='column list to export (only applicable for json output format) [default: %(default)s]', metavar='COLUMN_NAME' )
-        parser.add_argument('-r', '--regex', dest='column_regex', help='column regex to export (only applicable for json output format) [default: %(default)s]', metavar='RE' )
+        parser.add_argument('-o', '--format', dest='output_format', default='html', 
+                            help='recurse into subfolders [default: %(default)s]')
+        parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0, 
+                            help='set verbosity level [default: %(default)s]')
+        parser.add_argument('-d', '--destination', dest='destination_folder', default='splitted_data', 
+                            help='output folder destinaton', metavar='PATH' )
+        parser.add_argument('-i', '--id', dest='id_column', 
+                            help='id column name (is used to generate file name) [default: %(default)s]', 
+                            metavar='COLUMN_NAME' )
+        parser.add_argument('-t', '--text', dest='text_column',  default='tagged_text', 
+                            help='text column name (not applicable for json output format) [default: %(default)s]', 
+                            metavar='COLUMN_NAME' )
+        parser.add_argument('-c', '--columns', dest='column_list', nargs='*', 
+                            help='column list to export (only applicable for json output format) [default: %(default)s]', 
+                            metavar='COLUMN_NAME' )
+        parser.add_argument('-r', '--regex', dest='column_regex', 
+                            help='column regex to export (only applicable for json output format) [default: %(default)s]', 
+                            metavar='RE' )
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         parser.add_argument(dest='path', help='paths to csv file to split [default: %(default)s]', metavar='path')
 
