@@ -3,9 +3,7 @@
 '''
  -- shortdesc
 
- is a description
-
-It defines classes_and_methods
+Sptits WF file with html/xml/json column to single files
 
 @author:     Maksim Mikhalkou
 

@@ -3,9 +3,7 @@
 '''
 -- shortdesc
 
- is a description
-
-It defines classes_and_methods
+shuffle and take a sample from csv, or shuffle and split into train and set
 
 @author:     Maksim Mikhalkou
 
@@ -21,9 +19,9 @@ from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
 __all__ = []
-__version__ = 0.2
+__version__ = 0.3
 __date__ = '2018-04-14'
-__updated__ = '2018-04-14'
+__updated__ = '2018-04-25'
 
 DEBUG = 0
 PROFILE = 0
@@ -71,6 +69,8 @@ USAGE
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         parser.add_argument(dest="path", help="paths to the source CSV file [default: %(default)s]", 
                             metavar="PATH")
+        parser.add_argument('--split', dest='split',  action='count', default=0,
+                            help='split files into 2 (like test and train)', metavar='PATH' )
 
         # Process arguments
         args = parser.parse_args()
@@ -79,6 +79,7 @@ USAGE
         verbose = args.verbose
         result_destination = args.result_destination
         records_to_take = args.records_to_take
+        split = args.split
 
         if verbose > 0:
             print("Verbose mode on")
@@ -102,12 +103,26 @@ USAGE
         if result_destination == '{}-shuffled-{}.csv':
             result_destination = '{}-shuffled-{}.csv'.format(
                 os.path.splitext(os.path.basename(path))[0], records_to_take)
+            result_destination_test = '{}-shuffled-{}_test.csv'.format(
+                os.path.splitext(os.path.basename(path))[0], docs_count - records_to_take)
+        elif split>0:
+            result_destination_test = result_destination + '_{}'.format(docs_count 
+                                                                        - records_to_take)
         
-        input_file.sample(n=records_to_take).to_csv(result_destination, index=False)
+        train = input_file.sample(n=records_to_take)
+        train.to_csv(result_destination, index=False)
 
         if verbose>0:
-            print('Shuffled file wit {} records has been saved to {}'
+            print('Shuffled file with {} records has been saved to {}'
                   .format(records_to_take ,os.path.abspath(result_destination)))
+            
+        if split>0:
+            test=input_file.drop(train.index)
+            test.to_csv(result_destination_test, index=False)
+            
+            if verbose>0:
+                print('Split is enabled. Shuffled file with {} records has been saved to {}'
+                      .format(docs_count - records_to_take ,os.path.abspath(result_destination_test)))
         
         
         return 0
