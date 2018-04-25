@@ -19,7 +19,7 @@ from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 
 __all__ = []
-__version__ = 0.3
+__version__ = 0.31
 __date__ = '2018-04-14'
 __updated__ = '2018-04-25'
 
@@ -70,7 +70,7 @@ USAGE
         parser.add_argument(dest="path", help="paths to the source CSV file [default: %(default)s]", 
                             metavar="PATH")
         parser.add_argument('--split', dest='split',  action='count', default=0,
-                            help='split files into 2 (like test and train)', metavar='PATH' )
+                            help='split files into 2 (like test and train)')
 
         # Process arguments
         args = parser.parse_args()
