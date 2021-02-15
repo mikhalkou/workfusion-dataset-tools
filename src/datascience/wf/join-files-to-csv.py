@@ -109,7 +109,7 @@ Examples:
         if not os.path.exists(destination_folder):
             if verbose > 0:
                 print('Creating directory {}'.format(os.path.abspath(destination_folder)))
-            os.makedirs(destination_folder)
+            os.makedirs(os.path.abspath(destination_folder), exist_ok=True)
 
         output_df.to_csv(destination_file, sep=',', encoding='utf-8', index=False)
         if verbose > 0:
