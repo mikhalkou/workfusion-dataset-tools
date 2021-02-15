@@ -76,14 +76,14 @@ def main(argv=None): # IGNORE:C0111
 		try:
 				# Setup argument parser
 				parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
-				parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0, 
+				parser.add_argument('-v', '--verbose', dest='verbose', action='count', default=0,
 								help='set verbosity level [default: %(default)s]')
-				parser.add_argument('-d', '--destination', dest='report_destination', default='_report.csv', 
+				parser.add_argument('-d', '--destination', dest='report_destination', default='_report.csv',
 								help='report file destination and name', metavar='PATH' )
-				parser.add_argument('-t', '--taggedtext', dest='tagged_text_column',  default='tagged_text', 
+				parser.add_argument('-t', '--taggedtext', dest='tagged_text_column',  default='tagged_text',
 								help='text column name [default: %(default)s]', metavar='COLUMN_NAME' )
 				parser.add_argument('-V', '--version', action='version', version=program_version_message)
-				parser.add_argument(dest='path', help='paths to csv to analyze [default: %(default)s]', 
+				parser.add_argument(dest='path', help='paths to csv to analyze [default: %(default)s]',
 								metavar='path')
 
 				# Process arguments
@@ -125,13 +125,14 @@ def main(argv=None): # IGNORE:C0111
 								print('row {}: found {} extraction tags'.format(index, len(extraction_tags)))
 
 						for etag in extraction_tags:
-								if etag.tag not in document_data:
-										document_data[etag.tag] = tag_dict_doc()
-								document_data[etag.tag]['occurrences'] += 1
+								tagname = ET.QName(etag).localname
+								if tagname not in document_data:
+										document_data[tagname] = tag_dict_doc()
+								document_data[tagname]['occurrences'] += 1
 								if etag.text != etag.get('data-value'):
-										document_data[etag.tag]['errors'] += 1
+										document_data[tagname]['errors'] += 1
 								ttext = etag.text if etag.text is not None else ''
-								document_data[etag.tag]['word_counts'].append(len(ttext.split()))
+								document_data[tagname]['word_counts'].append(len(ttext.split()))
 
 						for k,v in document_data.items():
 								if k not in data:
@@ -140,8 +141,8 @@ def main(argv=None): # IGNORE:C0111
 								data[k]['errors'].append(v['errors'])
 								data[k]['word_counts'].append(v['word_counts'])
 
-				columns = ['col_name', 'occurs', 'occurs avg. per doc', 'occurs median', 'occurs max ', 
-							'documents count', 'documents where occurs', 'OCR error rate', 
+				columns = ['col_name', 'occurs', 'occurs avg. per doc', 'occurs median', 'occurs max ',
+							'documents count', 'documents where occurs', 'OCR error rate',
 							'words avg.', 'words median', 'words min', 'words max' ]
 				stats = pd.DataFrame(columns=columns)
 
@@ -171,7 +172,7 @@ def main(argv=None): # IGNORE:C0111
 						stats = pd.concat([stats, field_stats])
 
 
-				stats.to_csv(report_destination)
+				stats.to_csv(report_destination, sep=',', encoding='utf-8', index=False)
 
 				if verbose>0:
 						print('Report saved: {}'.format(os.path.abspath(report_destination)))
