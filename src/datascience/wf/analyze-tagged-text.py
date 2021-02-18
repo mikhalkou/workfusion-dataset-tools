@@ -24,9 +24,9 @@ from argparse import RawDescriptionHelpFormatter
 from unittest.mock import inplace
 
 __all__ = []
-__version__ = 0.2
+__version__ = 0.3
 __date__ = '2018-04-05'
-__updated__ = '2018-04-05'
+__updated__ = '2021-02-18'
 
 DEBUG = 0
 PROFILE = 0
@@ -141,7 +141,8 @@ def main(argv=None): # IGNORE:C0111
 								data[k]['errors'].append(v['errors'])
 								data[k]['word_counts'].append(v['word_counts'])
 
-				columns = ['col_name', 'occurs', 'occurs avg. per doc', 'occurs median', 'occurs max ',
+				columns = ['col_name', 'occurs', 'occurs avg. per doc', 'occurs perc.25','occurs median', 'occurs perc.75',
+							'occurs perc.90','occurs perc.95', 'occurs perc.98','occurs max',
 							'documents count', 'documents where occurs', 'OCR error rate',
 							'words avg.', 'words median', 'words min', 'words max' ]
 				stats = pd.DataFrame(columns=columns)
@@ -153,6 +154,12 @@ def main(argv=None): # IGNORE:C0111
 						omax = max(occurs)
 						omean = stat.mean(occurs)
 						omed = stat.median(occurs)
+						quantiles = stat.quantiles(occurs, n=100)
+						operc25 = quantiles[24]
+						operc75 = quantiles[74]
+						operc90 = quantiles[89]
+						operc95 = quantiles[94]
+						operc98 = quantiles[97]
 						oindocs = sum(x>0 for x in occurs)
 						docs = docs_count
 
@@ -166,8 +173,8 @@ def main(argv=None): # IGNORE:C0111
 						wmin = min(words_flat)
 						wmax = max(words_flat)
 
-						field_stats = pd.DataFrame([[k, ocount, omean, omed, omax, docs, oindocs,
-													errrate, wmean, wmed, wmin, wmax]],
+						field_stats = pd.DataFrame([[k, ocount, omean, operc25, omed, operc75, operc90, operc95,
+													 operc98, omax, docs, oindocs, errrate, wmean, wmed, wmin, wmax]],
 													columns=columns)
 						stats = pd.concat([stats, field_stats])
 
